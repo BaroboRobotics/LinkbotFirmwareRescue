@@ -16,7 +16,7 @@ Dialog::Dialog(QWidget *parent, QString hexfilename) :
   /* Find and replace the firmware version text template with the actual
    * firmware version. Kinda hacky. */
   auto html = ui->textBrowser->toHtml();
-  html.replace("{{FIRMWARE_VERSION}}", QFileInfo(hexfilename).baseName());
+  html.replace("{{FIRMWARE_VERSION}}", QFileInfo(hexfilename).completeBaseName());
   ui->textBrowser->setHtml(html);
 
   ui->progressBar->setMinimum(0);
