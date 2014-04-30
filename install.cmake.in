@@ -31,7 +31,10 @@ set(DIRS @INSTALL_DIRECTORIES@)
 ##############################################################################
 # Dependency Collection and Inclusion
 
-if(WIN32)
+# On Windows CMake, WIN32 is defined at install-time. But on linux CMake
+# cross-compiling for Windows, it is not; we need to pick it up from
+# configure-time, thus the @WIN32@.
+if(@WIN32@)
   # Make sure we have windeployqt.
   find_program(WINDEPLOYQT windeployqt)
   if(NOT WINDEPLOYQT)
