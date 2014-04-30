@@ -58,6 +58,11 @@ set(SOURCES
   src/listener.cpp
   )
 
+if(WIN32)
+  # Add the application icon 
+  list(APPEND SOURCES resource.rc)
+endif()
+
 #qt5_wrap_cpp(HEADERS
 #  src/dialog.h
 #  src/listener.h
