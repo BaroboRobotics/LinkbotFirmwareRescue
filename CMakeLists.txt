@@ -104,24 +104,3 @@ else()
 endif()
 
 install(TARGETS ${TARGET} RUNTIME DESTINATION ${INSTALL_BIN_DIR})
-
-# Our install.cmake script will run at install-time to collect all our
-# target's dependencies. These variables inform the install script of our
-# target's output file location and supplementary search directories.
-# FIXME the INSTALL_ prefix for these variables is misleading. Think up a
-# better prefix.
-set(INSTALL_EXECUTABLES "${TARGET}${CMAKE_EXECUTABLE_SUFFIX}")
-set(INSTALL_LIBRARIES "")
-# Above, we set CMAKE_(RUNTIME|LIBRARY)_OUTPUT_DIRECTORY to the current
-# project binary directory. If our install script is run from outside this
-# binary directory, it needs to know to search in it anyway.
-set(INSTALL_DIRECTORIES "${PROJECT_BINARY_DIR}")
-
-configure_file(install.cmake.in "${PROJECT_BINARY_DIR}/install.cmake" @ONLY)
-install(SCRIPT "${PROJECT_BINARY_DIR}/install.cmake")
-
-# On Windows, install.cmake depends on findmsvc.cmake living alongside it, but
-# we only need to copy it if this is an out-of-source build.
-if(WIN32 AND NOT ${PROJECT_BINARY_DIR} STREQUAL ${PROJECT_SOURCE_DIR})
-  file(COPY findmsvc.cmake DESTINATION "${PROJECT_BINARY_DIR}")
-endif()
