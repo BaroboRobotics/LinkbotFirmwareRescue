@@ -10,17 +10,38 @@ set(VERSION_MINOR 0)
 set(VERSION_PATCH 0)
 set(VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 
+# This project has one executable:
+
+set(target LinkbotFirmwareRescue)
+
+set(sources
+  src/main.cpp
+  src/dialog.cpp
+  src/listener.cpp
+  ui/dialog.ui
+  )
+if(WIN32)
+  list(APPEND sources appIcon.rc)
+endif()
+
+add_executable(${target} ${sources})
+
 #
 # CONFIG
 #
 
-# config variables
+# target properties
 
-# TODO: Use source file properties?
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DQT_NO_DEBUG_OUTPUT")
+set_target_properties(${target} PROPERTIES
+  COMPILE_FLAGS "-std=gnu++11"
+  COMPILE_FLAGS_RELEASE "-DQT_NO_DEBUG_OUTPUT"
+  AUTOMOC ON
+  AUTOUIC ON
+)
 if(WIN32)
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mwindows")
+  set_target_properties(${target} PROPERTIES
+    LINK_FLAGS_RELEASE "-mwindows"
+  )
 endif()
 
 # To simplify the call to fixup_bundle, make subprojects put their build
@@ -29,7 +50,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
 
 # requirements
 
@@ -39,37 +59,16 @@ find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 
-include_directories(${LIBBAROBO_INCLUDE_DIRS})
-include_directories(${LIBSTKCOMMS_INCLUDE_DIRS})
+include_directories(
+  ${LIBBAROBO_INCLUDE_DIRS}
+  ${LIBSTKCOMMS_INCLUDE_DIRS}
+)
 
-#
-# BUILD
-#
-
-set(target LinkbotFirmwareRescue)
-
-# sources
-
-set(sources
-  src/main.cpp
-  src/dialog.cpp
-  src/listener.cpp
-  )
-if(WIN32)
-  list(APPEND sources resource.rc)
-endif()
-
-qt5_wrap_ui(uifiles
-  ui/dialog.ui
-  )
-
-# build targets
-
-add_executable(${target} ${sources} ${uifiles})
+# Linker requirements
 
 target_link_libraries(${target}
-  ${LIBBAROBO_LIBRARIES}
-  ${LIBSTKCOMMS_LIBRARIES}
+  barobo
+  stkcomms
   Qt5::Gui
   Qt5::Widgets
   )
