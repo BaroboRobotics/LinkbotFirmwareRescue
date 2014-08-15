@@ -18,13 +18,19 @@ set(sources
   src/main.cpp
   src/dialog.cpp
   src/listener.cpp
-  ui/dialog.ui
   )
 if(WIN32)
   list(APPEND sources appIcon.rc)
 endif()
 
-add_executable(${target} ${sources})
+# We get to do this here so qt5_wrap_ui works
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+
+qt5_wrap_ui(uifiles ui/dialog.ui)
+
+add_executable(${target} ${sources} ${uifiles})
 
 #
 # CONFIG
@@ -54,10 +60,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # requirements
 
 add_subdirectory(../libbarobo libbarobo)
-
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Gui REQUIRED)
-find_package(Qt5Widgets REQUIRED)
 
 include_directories(
   ${LIBBAROBO_INCLUDE_DIRS}
