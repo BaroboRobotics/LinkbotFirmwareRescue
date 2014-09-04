@@ -59,12 +59,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # requirements
 
-add_subdirectory(../libbarobo libbarobo)
+add_subdirectory(../libbarobo barobo)
 
-include_directories(
-  ${LIBBAROBO_INCLUDE_DIRS}
-  ${LIBSTKCOMMS_INCLUDE_DIRS}
-)
+include_directories($<TARGET_PROPERTY:barobo,INCLUDE_DIRECTORIES>)
 
 # Linker requirements
 
