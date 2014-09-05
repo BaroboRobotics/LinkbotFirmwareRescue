@@ -42,7 +42,6 @@ set_target_properties(${target} PROPERTIES
   COMPILE_FLAGS "-std=gnu++11"
   COMPILE_FLAGS_RELEASE "-DQT_NO_DEBUG_OUTPUT"
   AUTOMOC ON
-  AUTOUIC ON
 )
 if(WIN32)
   set_target_properties(${target} PROPERTIES
