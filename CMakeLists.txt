@@ -28,6 +28,9 @@ find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost 1.54.0 REQUIRED)
+
 qt5_wrap_ui(uifiles ui/dialog.ui)
 
 add_executable(${target} ${sources} ${uifiles})
@@ -60,7 +63,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_subdirectory(../libbarobo barobo)
 
-include_directories($<TARGET_PROPERTY:barobo,INCLUDE_DIRECTORIES>)
+include_directories($<TARGET_PROPERTY:barobo,INCLUDE_DIRECTORIES> ${Boost_INCLUDE_DIRS})
 
 # Linker requirements
 
@@ -69,6 +72,7 @@ target_link_libraries(${target}
   stkcomms
   Qt5::Gui
   Qt5::Widgets
+  ${Boost_LIBRARIES}
   )
 
 #

@@ -1,4 +1,7 @@
 #include "dialog.h"
+
+#include <boost/scope_exit.hpp>
+
 #include <QApplication>
 #include <cassert>
 
@@ -58,6 +61,26 @@ static QString defaultHexFileName () {
 
 int main(int argc, char *argv[])
 {
+#ifdef _WIN32
+    SC_HANDLE scm = 0;
+    SC_HANDLE baromeshd = 0;
+
+    scm = OpenSCManager(nullptr, nullptr, SC_MANAGER_CONNECT);
+    if (scm) {
+        baromeshd = OpenService(scm, "baromeshd", SERVICE_START | SERVICE_STOP);
+        if (baromeshd) {
+          SERVICE_STATUS status;
+          ControlService(baromeshd, SERVICE_CONTROL_STOP, &status);
+        }
+    }
+
+    BOOST_SCOPE_EXIT(scm, baromeshd) {
+        if (scm && baromeshd) {
+            StartService(baromeshd, 0, nullptr);
+        }
+    } BOOST_SCOPE_EXIT_END
+#endif
+
     QApplication a(argc, argv);
     Dialog w { nullptr, argc > 1 ? argv[1] : defaultHexFileName() };
     w.show();
