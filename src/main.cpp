@@ -3,6 +3,7 @@
 #include <boost/scope_exit.hpp>
 
 #include <QApplication>
+#include <QDebug>
 #include <cassert>
 
 static QString defaultHexFileName () {
@@ -62,6 +63,18 @@ static QString defaultHexFileName () {
 int main(int argc, char *argv[])
 {
 #ifdef _WIN32
+    auto serviceStatusToString = [] (int status) -> const char* {
+        switch (status) {
+            case SERVICE_RUNNING:
+                return "SERVICE_RUNNING";
+            case SERVICE_STOPPED:
+                return "SERVICE_STOPPED";
+            case SERVICE_STOP_PENDING:
+                return "SERVICE_STOP_PENDING";
+            default:
+                return "(unknown service status)";
+        }
+    };
     SC_HANDLE scm = 0;
     SC_HANDLE baromeshd = 0;
 
@@ -69,14 +82,42 @@ int main(int argc, char *argv[])
     if (scm) {
         baromeshd = OpenService(scm, "baromeshd", SERVICE_START | SERVICE_STOP);
         if (baromeshd) {
-          SERVICE_STATUS status;
-          ControlService(baromeshd, SERVICE_CONTROL_STOP, &status);
+            SERVICE_STATUS status;
+            auto rc = ControlService(baromeshd, SERVICE_CONTROL_STOP, &status);
+            if (!rc) {
+                qDebug() << "ControlService failed:" << GetLastError();
+            }
+            else {
+                qDebug() << "ControlService reports:"
+                         << serviceStatusToString(status.dwCurrentState);
+            }
         }
+        else {
+            qDebug() << "OpenService failed:" << GetLastError();
+        }
+    }
+    else {
+        qDebug() << "OpenSCManager failed:" << GetLastError();
     }
 
     BOOST_SCOPE_EXIT(scm, baromeshd) {
         if (scm && baromeshd) {
             StartService(baromeshd, 0, nullptr);
+        }
+
+        if (scm) {
+            auto rc = CloseServiceHandle(scm);
+            if (!rc) {
+                qDebug() << "CloseServiceHandle(scm) failed:" << GetLastError();
+            }
+            scm = 0;
+        }
+        if (baromeshd) {
+            auto rc = CloseServiceHandle(baromeshd);
+            if (!rc) {
+                qDebug() << "CloseServiceHandle(scm) failed:" << GetLastError();
+            }
+            baromeshd = 0;
         }
     } BOOST_SCOPE_EXIT_END
 #endif
