@@ -61,14 +61,15 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # requirements
 
-add_subdirectory(../libbarobo barobo)
+add_subdirectory(../libstkcomms libstkcomms)
 
-include_directories($<TARGET_PROPERTY:barobo,INCLUDE_DIRECTORIES> ${Boost_INCLUDE_DIRS})
+include(LinkbotLabs)
+ll_add_dependency(baromesh/library baromesh)
 
 # Linker requirements
 
 target_link_libraries(${target}
-  barobo
+  baromesh
   stkcomms
   Qt5::Gui
   Qt5::Widgets

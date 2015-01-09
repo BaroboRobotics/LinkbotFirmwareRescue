@@ -1,5 +1,5 @@
 #include "listener.h"
-#include <mobot.h>
+#include "baromesh/dongledevicepath.hpp"
 
 Listener::Listener(QObject *parent) : QObject(parent)
 {
@@ -16,15 +16,19 @@ void Listener::startWork()
 void Listener::doWork()
 {
   static int lastStatus = 0;
-  char buf[1024];
-  int rc;
-  rc = Mobot_dongleGetTTY(buf, 1024);
+  int rc = 0;
+  std::string donglepath;
+  try {
+      donglepath = baromesh::dongleDevicePath();
+  } catch (...) {
+      rc = -1;
+  }
   if(
       (0 == rc) &&
       (0 != lastStatus)
     ) 
   {
-    emit dongleDetected(QString(buf));
+    emit dongleDetected(QString::fromStdString(donglepath));
     timer_->stop();
   }
   lastStatus = rc;

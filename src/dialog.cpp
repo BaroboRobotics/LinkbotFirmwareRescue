@@ -1,10 +1,10 @@
 #include "dialog.h"
 #include "ui_dialog.h"
 #include <libstkcomms.hpp>
-#include <mobot.h>
 #include <QDebug>
 #include <QFileInfo>
 #include <QMessageBox>
+#include "baromesh/dongledevicepath.hpp"
 
 Dialog::Dialog(QWidget *parent, QString hexfilename) :
     QDialog(parent),
@@ -35,7 +35,6 @@ Dialog::~Dialog()
 void Dialog::beginProgramming()
 {
   int numTries = 0;
-  char buf[1024];
   int rc;
   QMessageBox msgbox;
 #ifdef _WIN32
@@ -43,16 +42,19 @@ void Dialog::beginProgramming()
 #else
     usleep(3000000);
 #endif
-  rc = Mobot_dongleGetTTY(buf, 1024);
-  if(rc) {
+  std::string donglePath;
+  try {
+      donglePath = baromesh::dongleDevicePath();
+  }
+  catch (...) {
     msgbox.setText("No connected robots detected.");
     msgbox.exec();
     return;
   }
   while(1) {
-    qDebug() << "Connecting to: " << buf;
+    qDebug() << "Connecting to: " << QString::fromStdString(donglePath);
     stk_ = new CStkComms();
-    rc = stk_->connectWithTTY(buf);
+    rc = stk_->connectWithTTY(donglePath.c_str());
     qDebug() << "Connection finish with code: " << rc;
     if(rc) { 
       if(numTries > 20) {
